@@ -1,7 +1,11 @@
+from gettext import dpgettext
 from typing import Final
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from tables import Filters
+from telegram import InlineKeyboardMarkup, Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram.ext import CallbackQueryHandler
+
 
 TOKEN: Final = '6666000684:AAG8VteJNEBthN266225DWEr9Hj6uM4Xo3Y'
 BOT_USERNAME: Final = '@BitesByBytes_Bot'
@@ -17,48 +21,33 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Contact me at @glennquahh for any help!')
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-
 async def log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    options = [['Log Breakfast', 'Log Lunch'], ['Log Dinner', 'Log Snack']]
-    reply_markup = ReplyKeyboardMarkup(options, one_time_keyboard=True)
+    options = [
+        [{'text': 'Log Breakfast', 'callback_data': 'log_breakfast'}, 
+         {'text': 'Log Lunch', 'callback_data': 'log_lunch'}],
+        [{'text': 'Log Dinner', 'callback_data': 'log_dinner'}, 
+         {'text': 'Log Snack', 'callback_data': 'log_snack'}]
+    ]
     
-    await update.message.reply_text(
-        'Choose an option to log:',
-        reply_markup=reply_markup
-    )
+    reply_markup = InlineKeyboardMarkup(options)
+    await update.message.reply_text('Choose an option to log:', reply_markup=reply_markup)
 
-# To remove the keyboard after use
-async def remove_keyboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    reply_markup = ReplyKeyboardRemove()
-    
-    await update.message.reply_text(
-        'Keyboard removed.',
-        reply_markup=reply_markup
-    )
 
-# Handling button presses
-async def button_pressed(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_keyboard_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    action = query.data
-
-    if action == 'breakfast':
-        await query.message.reply_text('Insert Breakfast description and picture')
-    elif action == 'lunch':
-        await query.message.reply_text('Insert Lunch description and picture')
-    elif action == 'dinner':
-        await query.message.reply_text('Insert Dinner description and picture')
-    elif action == 'snack':
-        await query.message.reply_text('Insert Snack description and picture')
-
-# Attach the button data to the buttons
-def attach_button_data():
-    options = [['Log Breakfast', 'Log Lunch'], ['Log Dinner', 'Log Snack']]
-    button_data = [['breakfast', 'lunch'], ['dinner', 'snack']]
-    reply_markup = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(option, callback_data=data) for option, data in zip(row, button_data_row)] for row, button_data_row in zip(options, button_data)]
-    )
-    return reply_markup
+    selected_option = query.data
+    
+    if selected_option == 'log_breakfast':
+        await breakfast_command(update, context)  # Call the function with parentheses
+    elif selected_option == 'log_lunch':
+        await lunch_command(update, context)  # Call the function with parentheses
+    elif selected_option == 'log_dinner':
+        await dinner_command(update, context)  # Call the function with parentheses
+    elif selected_option == 'log_snack':
+        await snack_command(update, context)  # Call the function with parentheses
+    else:
+        if query is not None:
+            await query.answer('Invalid selection.')
 
 
 async def breakfast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -79,7 +68,7 @@ async def breakfast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def lunch_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Contact me at @glennquahh for any help!')
+    await update.message.reply_text('You have selected Lunch!')
 
 async def dinner_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Contact me at @glennquahh for any help!')
@@ -138,6 +127,8 @@ if __name__ == '__main__':
 
     # Messages
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
+    app.add_handler(CallbackQueryHandler(handle_keyboard_selection))
+
 
     # Errors
     app.add_error_handler(error)

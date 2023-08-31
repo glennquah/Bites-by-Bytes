@@ -1,14 +1,17 @@
 from gettext import dpgettext
 from typing import Final
+import configparser
 import typing
-from telegram import InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardMarkup, InputFile, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
 import datetime
+import requests
+from io import BytesIO
 
 
-from backend import insert_meal, get_meal_logs, create_database
+from backend import insert_meal, get_meal_logs, create_database, reset_logs
 
 # Initialize the database
 create_database()
@@ -26,6 +29,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Contact me at @glennquahh for any help!')
+
+async def reset_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    reset_logs()
+    await update.message.reply_text("Database has been reset.")
 
 async def log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     options = [
@@ -77,9 +84,8 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await message.reply_text('Great! Now send me a brief description of your meal!')
     else:
-        await message.reply_text("Hello, do make sure that this is a photo and not in a pdf / html format.")
+        await message.reply_text("Hello, make sure that this is a photo and not in a pdf / html format.")
 
-# ... (previous code)
 
 async def lunch_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -150,9 +156,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     meal_logs = get_meal_logs()
 
+    logs_text = "Meal Logs:\n"
     for log in meal_logs:
         user_id, meal_type, meal_description = log
-        print(f"{user_id} - {meal_type}: {meal_description}")
+        logs_text += f"{user_id} - {meal_type}: {meal_description}\n"
+
+    if logs_text:
+        await update.message.reply_text(logs_text)
+    else:
+        await update.message.reply_text("No meal logs found.")
 
 
 # Responses
@@ -225,6 +237,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('log', log_command))
     app.add_handler(CallbackQueryHandler(handle_keyboard_selection, pattern='^log_.*'))
     app.add_handler(CommandHandler('printlogs', print_logs_command))
+    app.add_handler(CommandHandler('resetlogs', reset_logs_command))
 
     # Messages
     app.add_handler(MessageHandler(filters.ATTACHMENT, handle_photo))

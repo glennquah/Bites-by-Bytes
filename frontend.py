@@ -5,6 +5,8 @@ from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
+import datetime
+
 
 from backend import insert_meal, get_meal_logs, create_database
 
@@ -75,37 +77,75 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await message.reply_text('Great! Now send me a brief description of your meal!')
     else:
-        await message.reply_text("Please send a photo of your meal first.")
+        await message.reply_text("Hello, do make sure that this is a photo and not in a pdf / html format.")
 
-async def handle_message(update: Update, context: typing.Any):
-    print('Handling message...')
-    message = update.message
-    user_id = message.from_user.id
-
-    if user_id in user_states and user_states[user_id]['step'] == 'description':
-        description = message.text
-
-        # Get the saved photo file_id from user_states
-        photo_file_id = user_states[user_id]['photo']
-
-        # Insert the meal information into the database
-        insert_meal(user_id, 'Breakfast', photo_file_id, description)
-
-        del user_states[user_id]
-
-        await message.reply_text("Thank you for logging your meal!")
-    else:
-        await message.reply_text("I'm not sure what you mean.")
-
+# ... (previous code)
 
 async def lunch_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('You have selected Lunch!')
+    query = update.callback_query
+    query.answer()  # acknowledge button press
+
+    user_id = query.from_user.id
+    user_states[user_id] = {'step': 'photo', 'meal_type': 'Lunch'}
+
+    await query.message.edit_text('You have selected Lunch! Please send me a photo of your meal!')
 
 async def dinner_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Contact me at @glennquahh for any help!')
+    query = update.callback_query
+    query.answer()  # acknowledge button press
+
+    user_id = query.from_user.id
+    user_states[user_id] = {'step': 'photo', 'meal_type': 'Dinner'}
+
+    await query.message.edit_text('You have selected Dinner! Please send me a photo of your meal!')
 
 async def snack_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Contact me at @glennquahh for any help!')
+    query = update.callback_query
+    query.answer()  # acknowledge button press
+
+    user_id = query.from_user.id
+    user_states[user_id] = {'step': 'photo', 'meal_type': 'Snack'}
+
+    await query.message.edit_text('You have selected Snack! Please send me a photo of your meal!')
+
+# ... (other code)
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    message_type: str = update.message.chat.type
+    text: str = update.message.text
+
+    print(f'User({update.message.chat.id}) in {message_type} : "{text}"')
+
+    user_id = update.message.from_user.id
+
+    if message_type == 'group':
+        if BOT_USERNAME in text:
+            new_text: str = text.replace(BOT_USERNAME, '').strip()
+            response: str = handle_response(new_text)
+            if response is not None:
+                print('Bot:', response)
+                await update.message.reply_text(response)
+        else:
+            return
+    else:
+        if user_id in user_states and user_states[user_id]['step'] == 'description':
+            description: str = text
+            photo_file_id: str = user_states[user_id]['photo']
+            meal_type: str = user_states[user_id]['meal_type']
+
+            # Insert the meal information into the database
+            insert_meal(user_id, meal_type, photo_file_id, description)
+
+            # Reset user's state
+            del user_states[user_id]
+            
+            await update.message.reply_text("Thank you for logging your meal!")
+            return
+
+        response: str = handle_response(text)
+        if response is not None:
+            print('Bot:', response)
+            await update.message.reply_text(response)
 
 async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     meal_logs = get_meal_logs()
@@ -114,9 +154,10 @@ async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         user_id, meal_type, meal_description = log
         print(f"{user_id} - {meal_type}: {meal_description}")
 
+
 # Responses
 
-def handle_response(text: str) -> str:
+def handle_response(text: str) -> typing.Optional[str]:
     processed: str = text.lower()
 
     if 'hello' in processed:
@@ -125,7 +166,8 @@ def handle_response(text: str) -> str:
     if 'bye' in processed:
         return 'Goodbye!'
     
-    return 'I do not understand you!'
+    return None  # Return None if the input is not recognized
+
 
 # Handlers
 
@@ -135,17 +177,37 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     print(f'User({update.message.chat.id}) in {message_type} : "{text}"')
 
+    user_id = update.message.from_user.id
+
     if message_type == 'group':
         if BOT_USERNAME in text:
             new_text: str = text.replace(BOT_USERNAME, '').strip()
             response: str = handle_response(new_text)
+            if response is not None:
+                print('Bot:', response)
+                await update.message.reply_text(response)
         else:
             return
     else:
-        response: str = handle_response(text)
+        # Check if the user is in 'description' state
+        if user_id in user_states and user_states[user_id]['step'] == 'description':
+            description: str = text
+            meal_type: str = user_states[user_id]['meal_type']
+            photo_file_id: str = user_states[user_id]['photo']
 
-    print('Bot:', response)
-    await update.message.reply_text(response)
+            # Insert the meal information into the database
+            insert_meal(user_id, meal_type, photo_file_id, description)
+
+            # Reset user's state
+            del user_states[user_id]
+            
+            await update.message.reply_text("Thank you for logging your meal!")
+            return
+
+        response: str = handle_response(text)
+        if response is not None:
+            print('Bot:', response)
+            await update.message.reply_text(response)
 
 # logging errors
 

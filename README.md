@@ -1,8 +1,7 @@
 # Bites-by-Bytes
 Plates paint progress, one byte at a time
 
-![logo](photo_2023-09-30_17-11-54.jpg){width=300px}
-
+<img src="photo_2023-09-30_17-11-54.jpg" width="300" height="300">
 
 <video width="640" height="360" controls>
   <source src="https://github.com/glennquah/Bites-by-Bytes/raw/main/Bytesforbytes%20vid.mp4" type="video/mp4">

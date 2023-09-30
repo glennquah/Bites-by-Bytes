@@ -1,5 +1,6 @@
 # Bites-by-Bytes
 Plates paint progress, one byte at a time
+![logo](photo_2023-09-30_17-11-54.jpg)
 
 # Description
 ---

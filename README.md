@@ -3,7 +3,11 @@ Plates paint progress, one byte at a time
 
 ![logo](photo_2023-09-30_17-11-54.jpg)
 
-![animationLogo](Bytesforbytes vid.mp4)
+<video width="640" height="360" controls>
+  <source src="Bytesforbytes vid.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 
 # Description
 ---

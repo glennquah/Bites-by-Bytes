@@ -1,14 +1,17 @@
 from gettext import dpgettext
 from typing import Final
+import configparser
 import typing
-from telegram import InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardMarkup, InputFile, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
 import datetime
+import requests
+from io import BytesIO
 
 
-from backend import insert_meal, get_meal_logs, create_database
+from backend import insert_meal, get_meal_logs, create_database, reset_logs
 
 # Initialize the database
 create_database()
@@ -26,6 +29,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Contact me at @glennquahh for any help!')
+
+async def reset_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    reset_logs()
+    await update.message.reply_text("Database has been reset.")
 
 async def log_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     options = [
@@ -77,9 +84,8 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await message.reply_text('Great! Now send me a brief description of your meal!')
     else:
-        await message.reply_text("Hello, do make sure that this is a photo and not in a pdf / html format.")
+        await message.reply_text("Hello, make sure that this is a photo and not in a pdf / html format.")
 
-# ... (previous code)
 
 async def lunch_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -150,9 +156,34 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     meal_logs = get_meal_logs()
 
-    for log in meal_logs:
-        user_id, meal_type, meal_description = log
-        print(f"{user_id} - {meal_type}: {meal_description}")
+    if meal_logs:
+        combined_text = "Meal Logs:\n\n"
+        
+        for idx, log in enumerate(meal_logs, start=1):
+            user_id, meal_type, meal_description, meal_photo = log
+            logs_text = f"{idx}. User {user_id} - {meal_type}: {meal_description}\n"
+            
+            if meal_photo:
+                # Get the file path using getFile method
+                file_info = await context.bot.get_file(file_id=meal_photo)  # Await here
+                file_path = file_info.file_path
+                
+                print("File Path:", file_path)  # Debug: Print the file path
+                
+                # Construct the URL using the file path
+                file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
+                print("File URL:", file_url)  # Debug: Print the file URL
+                
+                # Create a link to the photo that users can click to view it
+                link_to_photo = f'<a href="{file_url}">--Click For Photo--</a>'
+                combined_text += f"{logs_text}{link_to_photo}\n\n"
+            else:
+                combined_text += f"{logs_text}\n"
+
+        await update.message.reply_text(combined_text, parse_mode='HTML')
+    else:
+        await update.message.reply_text("No meal logs found.")
+
 
 
 # Responses
@@ -225,6 +256,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('log', log_command))
     app.add_handler(CallbackQueryHandler(handle_keyboard_selection, pattern='^log_.*'))
     app.add_handler(CommandHandler('printlogs', print_logs_command))
+    app.add_handler(CommandHandler('resetlogs', reset_logs_command))
 
     # Messages
     app.add_handler(MessageHandler(filters.ATTACHMENT, handle_photo))

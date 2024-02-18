@@ -11,7 +11,7 @@ Plates paint progress, one byte at a time
 
 ## Description
 
-**Bytes By Bytes** is a pioneering digital platform dedicated to revolutionizing meal tracking. Designed for a wide array of users—from mothers monitoring their children's nutrition, individuals battling anorexia seeking encouragement, to partners desiring to stay connected through shared meals—**Bytes By Bytes** simplifies meal logging with succinct descriptions. This platform is not just about tracking; it's about connecting. By promoting meal transparency, it encourages users to forge meaningful social bonds, making nutritional wellness a shared journey.
+**Bytes By Bytes** is a Telegram Bot dedicated to revolutionizing meal tracking. Designed for a wide array of users—from mothers monitoring their children's nutrition, individuals battling anorexia seeking encouragement, to partners desiring to stay connected through shared meals—**Bytes By Bytes** simplifies meal logging with succinct descriptions. This platform is not just about tracking; it's about connecting. By promoting meal transparency, it encourages users to forge meaningful social bonds, making nutritional wellness a shared journey.
 
 ## Purpose
 

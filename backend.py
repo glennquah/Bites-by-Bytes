@@ -7,6 +7,7 @@ def create_database():
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS meals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,       
             user_id INTEGER,
             username TEXT,
             meal_type TEXT,
@@ -50,6 +51,13 @@ def get_meal_logs():
 
     conn.close()
     return meal_logs
+
+def delete_meal(log_id):
+    conn = sqlite3.connect('meal_log.db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM meals WHERE id = ?", (log_id,))
+    conn.commit()
+    conn.close()
 
 # Other backend functions
 if __name__ == '__main__':

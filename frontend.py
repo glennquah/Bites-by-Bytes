@@ -5,10 +5,10 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputFile, Upda
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
-import datetime
+from datetime import datetime
 
 
-from backend import insert_meal, get_meal_logs, create_database, reset_logs
+from backend import insert_meal, get_meal_logs, create_database, reset_logs, delete_meal
 
 # Initialize the database
 create_database()
@@ -19,10 +19,15 @@ BOT_USERNAME: Final = '@BitesByBytes_Bot'
 
 # Frotnend Commands
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Hello, Welcome to BitesByBytes! Simply just add this telebot to a group chat with your loved ones for your logging to start')
+    await update.message.reply_text('Hello, Welcome to BitesByBytes! Simply just use this telebot with your loved ones for your logging to start! Use /help to see the available commands.')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Simply just press /log and select your meals to start with the logging!\n\nDo contact me at @glennquahh if you need any help!')
+    await update.message.reply_text('''Available commands:
+    - /start: Start the bot
+    - /log: Log a new meal
+    - /printlogs: View logged meals
+    - /delete <id>: Delete a meal log by ID
+    - /help: Show this message''')
 
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Contact me at @glennquahh for any help!')
@@ -137,7 +142,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             description: str = text
             photo_file_id: str = user_states[user_id]['photo']
             meal_type: str = user_states[user_id]['meal_type']
-            date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert the meal information into the database
             insert_meal(user_id, username, meal_type, photo_file_id, description, date)
@@ -161,24 +166,29 @@ async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         message_text = "<b>Meal Logs:</b>\n"
         buttons = []
         for index, log in enumerate(meal_logs, start=1):
-            _, username, meal_type, _, _, date = log
+            _, username, meal_type, _, _, date_str = log
+            # Correct usage of datetime.strptime
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            formatted_date = date_obj.strftime("%m-%d")  # Correct usage of datetime.strftime
             callback_data = f"detail_{index}"
             log_details_callbacks[callback_data] = log
-            buttons.append([InlineKeyboardButton(f"{date} - {meal_type} - {username}", callback_data=callback_data)])
+            buttons.append([InlineKeyboardButton(f"{formatted_date} : {meal_type} | {username}", callback_data=callback_data)])
         
         reply_markup = InlineKeyboardMarkup(buttons)
         await update.message.reply_text(message_text, parse_mode='HTML', reply_markup=reply_markup)
     else:
         await update.message.reply_text("No meal logs found.")
 
+
 async def handle_log_detail_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     callback_data = query.data
+    log_id = callback_data.split("_")[1]  # Extracting the log_id
     log = log_details_callbacks.get(callback_data)
 
     if log:
         _, username, meal_type, meal_description, meal_photo, date = log
-        detail_message = f"<b>Date:</b> {date}\n<b>Username:</b> {username}\n<b>Meal Type:</b> {meal_type}\n<b>Description:</b> {meal_description}"
+        detail_message = f"<b>ID:</b> {log_id}\n<b>Date:</b> {date}\n<b>Username:</b> {username}\n<b>Meal Type:</b> {meal_type}\n<b>Description:</b> {meal_description}\n\nUse /delete {log_id} to remove this entry."
         await context.bot.send_message(chat_id=query.message.chat_id, text=detail_message, parse_mode='HTML')
         if meal_photo:
             await context.bot.send_photo(chat_id=query.message.chat_id, photo=meal_photo)
@@ -186,6 +196,14 @@ async def handle_log_detail_callback(update: Update, context: ContextTypes.DEFAU
         await query.edit_message_text(text="Details not found.")
     await query.answer()
 
+async def delete_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if context.args:
+        log_id = context.args[0]
+        # Assuming you have a function delete_meal(log_id) in your backend.py
+        delete_meal(log_id)  # Implement this function in your backend
+        await update.message.reply_text(f"Deleted entry with ID {log_id}.")
+    else:
+        await update.message.reply_text("Please specify the ID of the entry you want to delete. Use /delete <id>.")
 
 # Responses
 
@@ -227,7 +245,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             meal_type: str = user_states[user_id]['meal_type']
             photo_file_id: str = user_states[user_id]['photo']
             username = update.message.from_user.username
-            date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert the meal information into the database
             insert_meal(user_id, username, meal_type, photo_file_id, description, date)
@@ -261,6 +279,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('printlogs', print_logs_command))
     app.add_handler(CallbackQueryHandler(handle_log_detail_callback, pattern='^detail_.*'))
     app.add_handler(CommandHandler('resetlogs', reset_logs_command))
+    app.add_handler(CommandHandler('delete', delete_command))
 
     # Messages
     app.add_handler(MessageHandler(filters.ATTACHMENT, handle_photo))

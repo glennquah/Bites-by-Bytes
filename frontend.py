@@ -115,18 +115,18 @@ async def snack_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await query.message.edit_text('You have selected Snack! Please send me a photo of your meal!')
 
-# ... (other code)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type
     text: str = update.message.text
+    bot_mentioned = BOT_USERNAME in text
 
     print(f'User({update.message.chat.id}) in {message_type} : "{text}"')
 
     user_id = update.message.from_user.id
     username = update.message.from_user.username
 
-    if message_type == 'group':
+    if message_type == 'group' and not bot_mentioned:
         if BOT_USERNAME in text:
             new_text: str = text.replace(BOT_USERNAME, '').strip()
             response: str = handle_response(new_text)

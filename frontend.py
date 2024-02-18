@@ -1,14 +1,11 @@
 from gettext import dpgettext
 from typing import Final
-import configparser
 import typing
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputFile, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
 import datetime
-import requests
-from io import BytesIO
 
 
 from backend import insert_meal, get_meal_logs, create_database, reset_logs

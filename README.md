@@ -40,7 +40,7 @@ This project was born from a simple yet profound need: to stay connected with my
 - **Python**: For the backend logic including the Telegram Bot.
 - **SQLite**: For a lightweight, efficient database solution.
 - **Telegram Bot API**: For real-time user interaction and updates.
-- **Heroku**: For deploying and hosting the bot, ensuring it's always online.
+- **PythonAnywhere**: For deploying and hosting the bot, ensuring it's always online.
 
 ## Feedback
 

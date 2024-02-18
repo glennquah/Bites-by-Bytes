@@ -2,7 +2,7 @@ from gettext import dpgettext
 from typing import Final
 import configparser
 import typing
-from telegram import InlineKeyboardMarkup, InputFile, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputFile, Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, MessageHandler
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import CallbackQueryHandler
@@ -63,15 +63,8 @@ async def handle_keyboard_selection(update: Update, context: ContextTypes.DEFAUL
             await query.answer('Invalid selection.')
 
 user_states = {}
+log_details_callbacks = {}
 
-async def breakfast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    query.answer()  # acknowledge button press
-
-    user_id = query.from_user.id
-    user_states[user_id] = {'step': 'photo'}
-
-    await query.message.edit_text('You have selected Breakfast! Please send me a photo of your meal!')
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('Handling photo...')
@@ -86,6 +79,14 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await message.reply_text("Hello, make sure that this is a photo and not in a pdf / html format.")
 
+async def breakfast_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    query.answer()  # acknowledge button press
+
+    user_id = query.from_user.id
+    user_states[user_id] = {'step': 'photo', 'meal_type': 'Breakfast'}
+
+    await query.message.edit_text('You have selected Breakfast! Please send me a photo of your meal!')
 
 async def lunch_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -139,9 +140,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             description: str = text
             photo_file_id: str = user_states[user_id]['photo']
             meal_type: str = user_states[user_id]['meal_type']
+            date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert the meal information into the database
-            insert_meal(user_id, username, meal_type, photo_file_id, description)
+            insert_meal(user_id, username, meal_type, photo_file_id, description, date)
 
             # Reset user's state
             del user_states[user_id]
@@ -156,17 +158,36 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     meal_logs = get_meal_logs()
+    global log_details_callbacks
 
     if meal_logs:
-        for log in meal_logs:
-            user_id, username, meal_type, meal_description, meal_photo = log
-            message_text = f"User {username} - {meal_type}: {meal_description}"
-            await update.message.reply_text(message_text)
-            
-            if meal_photo:
-                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=meal_photo)
+        message_text = "<b>Meal Logs:</b>\n"
+        buttons = []
+        for index, log in enumerate(meal_logs, start=1):
+            _, username, meal_type, _, _, date = log
+            callback_data = f"detail_{index}"
+            log_details_callbacks[callback_data] = log
+            buttons.append([InlineKeyboardButton(f"{date} - {meal_type} - {username}", callback_data=callback_data)])
+        
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await update.message.reply_text(message_text, parse_mode='HTML', reply_markup=reply_markup)
     else:
         await update.message.reply_text("No meal logs found.")
+
+async def handle_log_detail_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    callback_data = query.data
+    log = log_details_callbacks.get(callback_data)
+
+    if log:
+        _, username, meal_type, meal_description, meal_photo, date = log
+        detail_message = f"<b>Date:</b> {date}\n<b>Username:</b> {username}\n<b>Meal Type:</b> {meal_type}\n<b>Description:</b> {meal_description}"
+        await context.bot.send_message(chat_id=query.message.chat_id, text=detail_message, parse_mode='HTML')
+        if meal_photo:
+            await context.bot.send_photo(chat_id=query.message.chat_id, photo=meal_photo)
+    else:
+        await query.edit_message_text(text="Details not found.")
+    await query.answer()
 
 
 # Responses
@@ -209,9 +230,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             meal_type: str = user_states[user_id]['meal_type']
             photo_file_id: str = user_states[user_id]['photo']
             username = update.message.from_user.username
+            date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert the meal information into the database
-            insert_meal(user_id, username, meal_type, photo_file_id, description)
+            insert_meal(user_id, username, meal_type, photo_file_id, description, date)
 
             # Reset user's state
             del user_states[user_id]
@@ -240,6 +262,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('log', log_command))
     app.add_handler(CallbackQueryHandler(handle_keyboard_selection, pattern='^log_.*'))
     app.add_handler(CommandHandler('printlogs', print_logs_command))
+    app.add_handler(CallbackQueryHandler(handle_log_detail_callback, pattern='^detail_.*'))
     app.add_handler(CommandHandler('resetlogs', reset_logs_command))
 
     # Messages

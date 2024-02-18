@@ -11,7 +11,8 @@ def create_database():
             username TEXT,
             meal_type TEXT,
             meal_photo TEXT,
-            meal_description TEXT
+            meal_description TEXT,
+            date TEXT
         )
     ''')
 
@@ -19,12 +20,12 @@ def create_database():
     conn.close()
 
 #insert meal by inserting a new line
-def insert_meal(user_id, username, meal_type, meal_photo, meal_description):
+def insert_meal(user_id, username, meal_type, meal_photo, meal_description, date):
     conn = sqlite3.connect('meal_log.db')
     cursor = conn.cursor()
 
-    cursor.execute('INSERT INTO meals (user_id, username, meal_type, meal_photo, meal_description) VALUES (?, ?, ?, ?, ?)',
-                   (user_id, username, meal_type, meal_photo, meal_description))
+    cursor.execute('INSERT INTO meals (user_id, username, meal_type, meal_photo, meal_description, date) VALUES (?, ?, ?, ?, ?, ?)',
+                   (user_id, username, meal_type, meal_photo, meal_description, date))
 
     conn.commit()
     conn.close()
@@ -44,7 +45,7 @@ def get_meal_logs():
     conn = sqlite3.connect('meal_log.db')
     cursor = conn.cursor()
 
-    cursor.execute('SELECT user_id, username, meal_type, meal_description, meal_photo FROM meals')
+    cursor.execute('SELECT user_id, username, meal_type, meal_description, meal_photo, date FROM meals ORDER BY date DESC')
     meal_logs = cursor.fetchall()
 
     conn.close()

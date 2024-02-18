@@ -123,6 +123,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'User({update.message.chat.id}) in {message_type} : "{text}"')
 
     user_id = update.message.from_user.id
+    username = update.message.from_user.username
 
     if message_type == 'group':
         if BOT_USERNAME in text:
@@ -140,7 +141,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             meal_type: str = user_states[user_id]['meal_type']
 
             # Insert the meal information into the database
-            insert_meal(user_id, meal_type, photo_file_id, description)
+            insert_meal(user_id, username, meal_type, photo_file_id, description)
 
             # Reset user's state
             del user_states[user_id]
@@ -157,33 +158,15 @@ async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     meal_logs = get_meal_logs()
 
     if meal_logs:
-        combined_text = "Meal Logs:\n\n"
-        
-        for idx, log in enumerate(meal_logs, start=1):
-            user_id, meal_type, meal_description, meal_photo = log
-            logs_text = f"{idx}. User {user_id} - {meal_type}: {meal_description}\n"
+        for log in meal_logs:
+            user_id, username, meal_type, meal_description, meal_photo = log
+            message_text = f"User {username} - {meal_type}: {meal_description}"
+            await update.message.reply_text(message_text)
             
             if meal_photo:
-                # Get the file path using getFile method
-                file_info = await context.bot.get_file(file_id=meal_photo)  # Await here
-                file_path = file_info.file_path
-                
-                print("File Path:", file_path)  # Debug: Print the file path
-                
-                # Construct the URL using the file path
-                file_url = f"https://api.telegram.org/file/bot{TOKEN}/{file_path}"
-                print("File URL:", file_url)  # Debug: Print the file URL
-                
-                # Create a link to the photo that users can click to view it
-                link_to_photo = f'<a href="{file_url}">--Click For Photo--</a>'
-                combined_text += f"{logs_text}{link_to_photo}\n\n"
-            else:
-                combined_text += f"{logs_text}\n"
-
-        await update.message.reply_text(combined_text, parse_mode='HTML')
+                await context.bot.send_photo(chat_id=update.effective_chat.id, photo=meal_photo)
     else:
         await update.message.reply_text("No meal logs found.")
-
 
 
 # Responses
@@ -225,9 +208,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             description: str = text
             meal_type: str = user_states[user_id]['meal_type']
             photo_file_id: str = user_states[user_id]['photo']
+            username = update.message.from_user.username
 
             # Insert the meal information into the database
-            insert_meal(user_id, meal_type, photo_file_id, description)
+            insert_meal(user_id, username, meal_type, photo_file_id, description)
 
             # Reset user's state
             del user_states[user_id]

@@ -8,6 +8,7 @@ def create_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS meals (
             user_id INTEGER,
+            username TEXT,
             meal_type TEXT,
             meal_photo TEXT,
             meal_description TEXT
@@ -18,12 +19,12 @@ def create_database():
     conn.close()
 
 #insert meal by inserting a new line
-def insert_meal(user_id, meal_type, meal_photo, meal_description):
+def insert_meal(user_id, username, meal_type, meal_photo, meal_description):
     conn = sqlite3.connect('meal_log.db')
     cursor = conn.cursor()
 
-    cursor.execute('INSERT INTO meals (user_id, meal_type, meal_photo, meal_description) VALUES (?, ?, ?, ?)',
-                   (user_id, meal_type, meal_photo, meal_description))
+    cursor.execute('INSERT INTO meals (user_id, username, meal_type, meal_photo, meal_description) VALUES (?, ?, ?, ?, ?)',
+                   (user_id, username, meal_type, meal_photo, meal_description))
 
     conn.commit()
     conn.close()
@@ -43,7 +44,7 @@ def get_meal_logs():
     conn = sqlite3.connect('meal_log.db')
     cursor = conn.cursor()
 
-    cursor.execute('SELECT user_id, meal_type, meal_description, meal_photo FROM meals')
+    cursor.execute('SELECT user_id, username, meal_type, meal_description, meal_photo FROM meals')
     meal_logs = cursor.fetchall()
 
     conn.close()

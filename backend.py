@@ -46,7 +46,7 @@ def get_meal_logs():
     conn = sqlite3.connect('meal_log.db')
     cursor = conn.cursor()
 
-    cursor.execute('SELECT user_id, username, meal_type, meal_description, meal_photo, date FROM meals ORDER BY date DESC')
+    cursor.execute('SELECT id, user_id, username, meal_type, meal_description, meal_photo, date FROM meals ORDER BY date DESC')
     meal_logs = cursor.fetchall()
 
     conn.close()

@@ -159,18 +159,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(response)
 
 async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    meal_logs = get_meal_logs()
+    meal_logs = get_meal_logs()  # This function should fetch meal logs from your database
     global log_details_callbacks
 
     if meal_logs:
         message_text = "<b>Meal Logs:</b>\n"
         buttons = []
-        for index, log in enumerate(meal_logs, start=1):
-            _, username, meal_type, _, _, date_str = log
-            # Correct usage of datetime.strptime
+        for log in meal_logs:
+            id, _, username, meal_type, _, _, date_str = log
             date_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-            formatted_date = date_obj.strftime("%m-%d")  # Correct usage of datetime.strftime
-            callback_data = f"detail_{index}"
+            formatted_date = date_obj.strftime("%m-%d")
+            callback_data = f"detail_{id}"  # Use actual database ID for callback data
             log_details_callbacks[callback_data] = log
             buttons.append([InlineKeyboardButton(f"{formatted_date} : {meal_type} | {username}", callback_data=callback_data)])
         
@@ -179,16 +178,14 @@ async def print_logs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     else:
         await update.message.reply_text("No meal logs found.")
 
-
 async def handle_log_detail_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     callback_data = query.data
-    log_id = callback_data.split("_")[1]  # Extracting the log_id
     log = log_details_callbacks.get(callback_data)
 
     if log:
-        _, username, meal_type, meal_description, meal_photo, date = log
-        detail_message = f"<b>ID:</b> {log_id}\n<b>Date:</b> {date}\n<b>Username:</b> {username}\n<b>Meal Type:</b> {meal_type}\n<b>Description:</b> {meal_description}\n\nUse /delete {log_id} to remove this entry."
+        id, user_id, username, meal_type, meal_description, meal_photo, date = log
+        detail_message = f"<b>ID:</b> {id}\n<b>Date:</b> {date}\n<b>Username:</b> {username}\n<b>Meal Type:</b> {meal_type}\n<b>Description:</b> {meal_description}\n\nUse /delete {id} to remove this entry."
         await context.bot.send_message(chat_id=query.message.chat_id, text=detail_message, parse_mode='HTML')
         if meal_photo:
             await context.bot.send_photo(chat_id=query.message.chat_id, photo=meal_photo)

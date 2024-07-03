@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-07-03T02:11:56.907Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="u1khFEswN6j5At6bBtf2" version="24.6.4" type="github">
+<mxfile host="app.diagrams.net" modified="2024-07-03T08:47:29.608Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="oKrNdLo051IJSsI9uAPW" version="24.6.4" type="github">
   <diagram name="Page-1" id="XKJ9BVDY6nb7cO75g__U">
-    <mxGraphModel dx="1434" dy="719" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1434" dy="723" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -19,7 +19,7 @@
         <mxCell id="1Bc746L5lvZh1pD9ycNG-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="1Bc746L5lvZh1pD9ycNG-5" target="1Bc746L5lvZh1pD9ycNG-7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="1Bc746L5lvZh1pD9ycNG-5" value="Admin using CREW" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="1Bc746L5lvZh1pD9ycNG-5" value="AdminStaff using CREW" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="286.61" y="218.8" width="129.36" height="30" as="geometry" />
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="1Bc746L5lvZh1pD9ycNG-7" target="1Bc746L5lvZh1pD9ycNG-8">
@@ -35,7 +35,7 @@
           <mxGeometry x="291.29" y="400" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-9" value="&lt;font color=&quot;#ffffff&quot;&gt;Subscriber Notification&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#ffffff&quot;&gt;(Drivers)&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;align=center;" vertex="1" parent="1">
-          <mxGeometry x="291.29" y="560" width="120" height="60" as="geometry" />
+          <mxGeometry x="291.29" y="610" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-10" value="" style="shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#4495D1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam.portal_admin;" vertex="1" parent="1">
           <mxGeometry x="610" y="150" width="62.59" height="68.8" as="geometry" />
@@ -43,11 +43,11 @@
         <mxCell id="1Bc746L5lvZh1pD9ycNG-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="1Bc746L5lvZh1pD9ycNG-11" target="1Bc746L5lvZh1pD9ycNG-13">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="1Bc746L5lvZh1pD9ycNG-11" value="Admin using FLEET" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="1Bc746L5lvZh1pD9ycNG-11" value="AdminStaff using FLEET" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="570" y="218.8" width="129.36" height="30" as="geometry" />
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-12" value="&lt;font color=&quot;#ffffff&quot;&gt;Subscriber Notification&lt;/font&gt;&lt;div&gt;&lt;font color=&quot;#ffffff&quot;&gt;(Riders)&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;align=center;" vertex="1" parent="1">
-          <mxGeometry x="574.68" y="560" width="120" height="60" as="geometry" />
+          <mxGeometry x="574.68" y="610" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="1Bc746L5lvZh1pD9ycNG-13" target="1Bc746L5lvZh1pD9ycNG-14">
           <mxGeometry relative="1" as="geometry" />
@@ -60,6 +60,12 @@
         </mxCell>
         <mxCell id="1Bc746L5lvZh1pD9ycNG-14" value="&lt;font color=&quot;#ffffff&quot;&gt;Subscription Packaging&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;align=center;" vertex="1" parent="1">
           <mxGeometry x="574.68" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="1Bc746L5lvZh1pD9ycNG-21" value="PULL&lt;div&gt;HTTPS Requests&lt;/div&gt;&lt;div&gt;ANDROID / IOS APPS&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="550" width="210.64" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="1Bc746L5lvZh1pD9ycNG-22" value="PULL&lt;div&gt;HTTPS Requests&lt;/div&gt;&lt;div&gt;(ANDROID APP)&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="355.97" y="550" width="104.03" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
